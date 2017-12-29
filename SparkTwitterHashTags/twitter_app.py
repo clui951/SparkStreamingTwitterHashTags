@@ -6,13 +6,13 @@ import requests_oauthlib
 import socket
 import sys
 
-ACCESS_TOKEN = 'ACCESS_TOKEN'
-ACCESS_SECRET = 'ACCESS_SECRET'
-CONSUMER_KEY = 'CONSUMER_KEY'
-CONSUMER_SECRET = 'CONSUMER_SECRET'
+ACCESS_TOKEN = None
+ACCESS_SECRET = None
+CONSUMER_KEY = None
+CONSUMER_SECRET = None
 
-TCP_IP = 'localhost'
-TCP_PORT = 9009
+TCP_IP = None
+TCP_PORT = None
 
 logger = None
 
@@ -97,7 +97,11 @@ def send_tweets_stream_response_to_spark(stream_response, conn):
             tweet_text = full_tweet['text']
             logger.info("Tweet Text: " + tweet_text)
             logger.info("------------------------------------------")
-            conn.send(tweet_text + "\n")
+
+            tweet_text += '\n'
+            tweet_text_bytestring = tweet_text.encode('utf-8')
+            conn.sendall(tweet_text_bytestring)
+
         except:
             e = sys.exc_info()[0]
             logger.error("Error: %s" % e)
