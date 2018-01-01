@@ -59,6 +59,19 @@ def get_sql_context_instance(spark_context):
     return globals()['sqlContextSingletonInstance']
 
 
+def send_df_to_dashboard(df):
+    # extract the hashtags from dataframe and convert them into array
+    top_tags = [str(t.hashtag) for t in df.select("hashtag").collect()]
+
+    # extract the counts from dataframe and convert them into array
+    tags_count = [p.hashtag_count for p in df.select("hashtag_count").collect()]
+
+    # initialize and send the data through REST API
+    url = 'http://localhost:5001/updateData'
+    request_data = {'label': str(top_tags), 'data': str(tags_count)}
+    response = requests.post(url, data=request_data)
+
+
 def process_rdd(time, rdd):
     print("----------- %s -----------" % str(time))
     try:
@@ -79,8 +92,8 @@ def process_rdd(time, rdd):
         hashtag_top_counts_df.show()
 
         # call this method to send hashtag_top_counts_df to dashboard
-        # send_df_to_dashboard(hashtag_top_counts_df)
-        
+        send_df_to_dashboard(hashtag_top_counts_df)
+
     except:
         e = sys.exc_info()[0]
         print("Error: %s" % e)
